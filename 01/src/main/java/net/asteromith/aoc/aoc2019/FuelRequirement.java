@@ -18,6 +18,19 @@ public class FuelRequirement {
   }
 
   public long getValue() {
-    return (moduleMass / 3) - 2;
+    return forMassRecursive(moduleMass, 0);
+  }
+
+  private long forMassRecursive(long mass, long accu) {
+    long thisMass = forMass(mass);
+    if (thisMass <= 0) {
+      return accu;
+    } else {
+      return forMassRecursive(thisMass, accu + thisMass);
+    }
+  }
+
+  private static long forMass(long mass) {
+    return (mass / 3) - 2;
   }
 }
