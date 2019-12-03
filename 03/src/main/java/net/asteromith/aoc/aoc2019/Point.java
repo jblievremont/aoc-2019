@@ -60,4 +60,8 @@ class Point implements Comparable<Point> {
       ", y=" + y +
       '}';
   }
+
+  int totalSteps(Path p1, Path p2) {
+    return p1.stepsTo(this) + p2.stepsTo(this);
+  }
 }
