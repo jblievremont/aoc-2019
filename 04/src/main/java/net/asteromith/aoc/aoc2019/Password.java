@@ -24,35 +24,33 @@ public class Password {
     return value >= MIN && value <= MAX;
   }
 
-  boolean hasSameAdjacentDigits() {
-    boolean hasSameAdjacentDigits = false;
-    char[] digits = toString().toCharArray();
-    char previous = ' ';
-    for(char d: digits) {
-      hasSameAdjacentDigits = hasSameAdjacentDigits || (d == previous);
-      previous = d;
-    }
-    return hasSameAdjacentDigits;
-  }
-
-  boolean hasIncreasingDigits() {
-    boolean hasIncreasingDigits = true;
-    char[] digits = toString().toCharArray();
+  boolean meetsCriteria() {
+    boolean atLeastOnePair = false;
     char previous = '0';
-    for(char d: digits) {
-      hasIncreasingDigits = hasIncreasingDigits && (d >= previous);
-      previous = d;
+    int countSame = 0;
+    for(char current: toString().toCharArray()) {
+      if(current < previous) {
+        return false;
+      } else if (current == previous) {
+        countSame ++;
+      } else {
+        atLeastOnePair = atLeastOnePair || countSame == 2;
+        countSame = 1;
+      }
+      previous = current;
     }
-    return hasIncreasingDigits;
+
+    return atLeastOnePair || countSame == 2;
   }
 
   boolean isValid() {
-    return isInInputRange() && hasSameAdjacentDigits() && hasIncreasingDigits();
+    return isInInputRange() && meetsCriteria();
   }
 
   static long countInRange() {
-    return IntStream.range(MIN, MAX)
+    return IntStream.range(MIN, MAX + 1)
       .mapToObj(Password::of)
+      //.peek(p -> System.out.printf("%s: %s%n", p, p.isValid()))
       .filter(Password::isValid)
       .count();
   }
