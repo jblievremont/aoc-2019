@@ -26,9 +26,13 @@ public class Instruction {
 
   enum OpCode {
     ADD(1, 4),
-    MUL(2, 4),
-    INP(3, 2),
-    DSP(4, 2),
+    MULTIPLY(2, 4),
+    INPUT(3, 2),
+    DISPLAY(4, 2),
+    JUMP_IF(5, 0),
+    JUMP_IF_NOT(6, 0),
+    LESS_THAN(7, 4),
+    EQUALS(8, 4),
     HLT(99, 0);
 
     final int code;

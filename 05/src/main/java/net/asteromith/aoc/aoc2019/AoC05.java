@@ -11,7 +11,7 @@ public class AoC05 {
       BufferedReader inputReader = new BufferedReader(new InputStreamReader(AoC05.class.getResourceAsStream("/input")))
     ) {
       String input = inputReader.readLine();
-      IntCodeComputer.execute(input);
+      IntCodeComputer.execute(input, System.in, System.out);
     } catch (IOException ioe) {
       ioe.printStackTrace(System.err);
     }

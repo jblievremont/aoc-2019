@@ -1,7 +1,6 @@
 package net.asteromith.aoc.aoc2019;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,19 +14,23 @@ public class IntCodeComputer {
   private static final int OFFSET_TARGET   = 3;
 
   private final List<Integer> memory;
+  private final InputStream in;
+  private final PrintWriter out;
   private int programCounter;
 
-  private IntCodeComputer(String input) {
-    this.memory = parse(input);
+  private IntCodeComputer(String program, InputStream in, OutputStream out) {
+    this.memory = parse(program);
+    this.in = in;
+    this.out = new PrintWriter(out);
     this.programCounter = 0;
   }
 
-  static String execute(String input) {
-    return new IntCodeComputer(input).execute();
+  static String execute(String program, InputStream in, OutputStream out) {
+    return new IntCodeComputer(program, in, out).execute();
   }
 
-  private static List<Integer> parse(String input) {
-    return Stream.of(input.split(SEPARATOR))
+  private static List<Integer> parse(String program) {
+    return Stream.of(program.split(SEPARATOR))
       .map(Integer::valueOf)
       .collect(Collectors.toList());
   }
@@ -40,21 +43,43 @@ public class IntCodeComputer {
         case ADD:
           store(OFFSET_TARGET, loadFirstOperand(lastOp.op1Mode) + loadSecondOperand(lastOp.op2Mode));
           break;
-        case MUL:
+        case MULTIPLY:
           store(OFFSET_TARGET,loadFirstOperand(lastOp.op1Mode) * loadSecondOperand(lastOp.op2Mode));
           break;
-        case INP:
-          System.out.print("input: ");
+        case INPUT:
+          out.print("input: ");
+          out.flush();
           try(
-            BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader r = new BufferedReader(new InputStreamReader(in));
           ) {
             store(OFFSET_OPERAND1, Integer.parseInt(r.readLine(), 10));
           } catch(Throwable e) {
             throw new IllegalArgumentException(e);
           }
           break;
-        case DSP:
-          System.out.println(loadFirstOperand(lastOp.op1Mode));
+        case DISPLAY:
+          out.println(loadFirstOperand(lastOp.op1Mode));
+          out.flush();
+          break;
+        case JUMP_IF:
+          if (loadFirstOperand(lastOp.op1Mode) != 0) {
+            programCounter = loadSecondOperand(lastOp.op2Mode);
+          } else {
+            programCounter += 3;
+          }
+          break;
+        case JUMP_IF_NOT:
+          if (loadFirstOperand(lastOp.op1Mode) == 0) {
+            programCounter = loadSecondOperand(lastOp.op2Mode);
+          } else {
+            programCounter += 3;
+          }
+          break;
+        case LESS_THAN:
+          store(OFFSET_TARGET, loadFirstOperand(lastOp.op1Mode) < loadSecondOperand(lastOp.op2Mode) ? 1 : 0);
+          break;
+        case EQUALS:
+          store(OFFSET_TARGET, loadFirstOperand(lastOp.op1Mode).equals(loadSecondOperand(lastOp.op2Mode)) ? 1 : 0);
           break;
         case HLT:
           break;
@@ -63,6 +88,8 @@ public class IntCodeComputer {
       }
       programCounter += lastOp.opCode.length;
     } while(lastOp.opCode != Instruction.OpCode.HLT);
+    out.flush();
+    out.close();
     return memory.stream().map(Object::toString).collect(Collectors.joining(SEPARATOR));
   }
 
