@@ -1,6 +1,9 @@
 package net.asteromith.aoc.aoc2019;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public class Body {
@@ -37,5 +40,18 @@ public class Body {
   @Override
   public int hashCode() {
     return Objects.hash(name, parent);
+  }
+
+  List<Body> orbitPathTo(Body ancestor) {
+    if (this == ancestor) {
+      return Collections.emptyList();
+    } else {
+      if (parent == null) {
+        throw new IllegalStateException("No orbit path from COM to any object");
+      }
+      List<Body> thisPath = new ArrayList<>(parent.orbitPathTo(ancestor));
+      thisPath.add(parent);
+      return Collections.unmodifiableList(thisPath);
+    }
   }
 }

@@ -28,4 +28,25 @@ class StarSystemTest {
     assertThat(underTest.bodies.size()).isEqualTo(12);
     assertThat(underTest.totalNumberOfOrbits()).isEqualTo(42);
   }
+
+  @Test
+  public void orbitTransfers() {
+    StarSystem underTest = StarSystem.of(new ByteArrayInputStream((
+            "COM)B\n" +
+            "B)C\n" +
+            "C)D\n" +
+            "D)E\n" +
+            "E)F\n" +
+            "B)G\n" +
+            "G)H\n" +
+            "D)I\n" +
+            "E)J\n" +
+            "J)K\n" +
+            "K)L\n" +
+            "K)YOU\n" +
+            "I)SAN\n").getBytes(StandardCharsets.UTF_8)));
+    assertThat(underTest.orbitTransfers("YOU", "L")).isEqualTo(0);
+    assertThat(underTest.orbitTransfers("YOU", "K")).isEqualTo(1);
+    assertThat(underTest.orbitTransfers("YOU", "SAN")).isEqualTo(4);
+  }
 }

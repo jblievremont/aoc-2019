@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class StarSystem {
 
@@ -57,13 +58,20 @@ public class StarSystem {
     return bodies.values().stream().mapToInt(b -> b.orbitLength).sum();
   }
 
-  private static class Orbit {
-    String parent;
-    String child;
-    private Orbit(String parent, String child) {
-      this.parent = parent;
-      this.child = child;
+  public int orbitTransfers(String bodyName1, String bodyName2) {
+    Body body1 = bodies.get(bodyName1);
+    Body body2 = bodies.get(bodyName2);
+    List<Body> orbitPath1 = body1.orbitPathTo(Body.COM);
+    List<Body> orbitPath2 = body2.orbitPathTo(Body.COM);
+    Body commonParent = Body.COM;
+    for (int i = 0; i < Math.min(orbitPath1.size(), orbitPath2.size()); i ++) {
+      if (orbitPath1.get(i).equals(orbitPath2.get(i))) {
+        commonParent = orbitPath1.get(i);
+      } else {
+        break;
+      }
     }
+    return body1.orbitPathTo(commonParent).size() + body2.orbitPathTo(commonParent).size() - 2;
   }
 }
 
