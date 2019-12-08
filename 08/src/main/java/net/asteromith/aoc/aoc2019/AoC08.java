@@ -24,5 +24,6 @@ public class AoC08 {
       }
     }
     System.out.println(countsByLayer[minZLayer][1] * countsByLayer[minZLayer][2]);
+    System.out.println(image);
   }
 }
