@@ -13,24 +13,26 @@ public class IntCodeComputer {
   private static final int OFFSET_OPERAND2 = 2;
   private static final int OFFSET_TARGET   = 3;
 
+  private final int id;
   private final List<Integer> memory;
   private final BufferedReader in;
   private final PrintWriter out;
   private int programCounter;
 
-  private IntCodeComputer(String program, InputStream in, OutputStream out) {
+  private IntCodeComputer(int id, String program, InputStream in, OutputStream out) {
+    this.id = id;
     this.memory = parse(program);
     this.in = new BufferedReader(new InputStreamReader(in));
     this.out = new PrintWriter(out);
     this.programCounter = 0;
   }
 
-  static IntCodeComputer of(String program, InputStream in, OutputStream out) {
-    return new IntCodeComputer(program, in, out);
+  static IntCodeComputer of(int id, String program, InputStream in, OutputStream out) {
+    return new IntCodeComputer(id, program, in, out);
   }
 
   static String execute(String program, InputStream in, OutputStream out) {
-    return of(program, in, out).execute();
+    return of(0, program, in, out).execute();
   }
 
   private static List<Integer> parse(String program) {
@@ -39,8 +41,9 @@ public class IntCodeComputer {
       .collect(Collectors.toList());
   }
 
-  private String execute() {
+  String execute() {
     Instruction lastOp;
+    System.err.println(id + " Start");
     do {
       lastOp = Instruction.of(memory.get(programCounter));
       switch(lastOp.opCode) {
@@ -52,14 +55,18 @@ public class IntCodeComputer {
           break;
         case INPUT:
           try {
-            store(OFFSET_OPERAND1, Integer.parseInt(in.readLine(), 10));
+            int input = Integer.parseInt(in.readLine(), 10);
+            System.err.println(id + " Read: " + input);
+            store(OFFSET_OPERAND1, input);
           } catch(IOException e) {
             e.printStackTrace(System.err);
           }
           break;
         case DISPLAY:
-          out.println(loadFirstOperand(lastOp.op1Mode));
+          Integer output = loadFirstOperand(lastOp.op1Mode);
+          out.println(output);
           out.flush();
+          System.err.println(id + " Wrote: " + output);
           break;
         case JUMP_IF:
           if (loadFirstOperand(lastOp.op1Mode) != 0) {
@@ -88,10 +95,12 @@ public class IntCodeComputer {
       }
       programCounter += lastOp.opCode.length;
     } while(lastOp.opCode != Instruction.OpCode.HLT);
+    System.err.println(id + " End");
     try {
-      in.close();
-    } catch(IOException e) {
-      e.printStackTrace(System.err);
+      // Force flush of input
+      in.readLine();
+    } catch (Throwable t) {
+      // NOP
     }
     out.flush();
     out.close();
