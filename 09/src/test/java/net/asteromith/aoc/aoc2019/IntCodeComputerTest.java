@@ -1,0 +1,56 @@
+package net.asteromith.aoc.aoc2019;
+
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class IntCodeComputerTest {
+
+  @ParameterizedTest(name = "Execution of [{0}] with input [{2}] should yield [{1}] and output [{3}]")
+  @ArgumentsSource(WellFormedIntCodeProvider.class)
+  public void shouldExecuteWellFormedIntCode(String program, String expectedEndState, String input, String expectedOutput) {
+    ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    assertThat(IntCodeComputer.execute(program, in, out)).isEqualTo(expectedEndState);
+    assertThat(new String(out.toByteArray())).isEqualTo(expectedOutput);
+  }
+
+  static class WellFormedIntCodeProvider implements ArgumentsProvider {
+
+    @Override
+    public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) throws Exception {
+      return Stream.of(
+        Arguments.of("1,0,0,0,99", "2,0,0,0,99", "", ""),
+        Arguments.of("2,3,0,3,99", "2,3,0,6,99", "", ""),
+        Arguments.of("2,4,4,5,99,0", "2,4,4,5,99,9801", "", ""),
+        Arguments.of("1,1,1,4,99,5,6,0,99", "30,1,1,4,2,5,6,0,99", "", ""),
+        Arguments.of("3,9,8,9,10,9,4,9,99,-1,8", "3,9,8,9,10,9,4,9,99,0,8", "0", "0" + System.lineSeparator()),
+        Arguments.of("3,9,8,9,10,9,4,9,99,-1,8", "3,9,8,9,10,9,4,9,99,1,8", "8", "1" + System.lineSeparator()),
+        Arguments.of("3,9,7,9,10,9,4,9,99,-1,8", "3,9,7,9,10,9,4,9,99,1,8", "0", "1" + System.lineSeparator()),
+        Arguments.of("3,9,7,9,10,9,4,9,99,-1,8", "3,9,7,9,10,9,4,9,99,0,8", "8", "0" + System.lineSeparator()),
+        Arguments.of("3,3,1108,-1,8,3,4,3,99", "3,3,1108,0,8,3,4,3,99", "0", "0" + System.lineSeparator()),
+        Arguments.of("3,3,1108,-1,8,3,4,3,99", "3,3,1108,1,8,3,4,3,99", "8", "1" + System.lineSeparator()),
+        Arguments.of("3,3,1107,-1,8,3,4,3,99", "3,3,1107,1,8,3,4,3,99", "0", "1" + System.lineSeparator()),
+        Arguments.of("3,3,1107,-1,8,3,4,3,99", "3,3,1107,0,8,3,4,3,99", "8", "0" + System.lineSeparator()),
+        Arguments.of("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9", "3,12,6,12,15,1,13,14,13,4,13,99,0,0,1,9", "0", "0" + System.lineSeparator()),
+        Arguments.of("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9", "3,12,6,12,15,1,13,14,13,4,13,99,8,1,1,9", "8", "1" + System.lineSeparator()),
+        Arguments.of("3,3,1105,-1,9,1101,0,0,12,4,12,99,1", "3,3,1105,0,9,1101,0,0,12,4,12,99,0", "0", "0" + System.lineSeparator()),
+        Arguments.of("3,3,1105,-1,9,1101,0,0,12,4,12,99,1", "3,3,1105,8,9,1101,0,0,12,4,12,99,1", "8", "1" + System.lineSeparator()),
+        Arguments.of("109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99", "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,1", "", "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99,".replace(",", System.lineSeparator())),
+        Arguments.of("1102,34915192,34915192,7,4,7,99,0", "1102,34915192,34915192,7,4,7,99,1219070632396864", "", "1219070632396864" + System.lineSeparator()),
+        Arguments.of("1102,34463338,34463338,7,4,7,99,0", "1102,34463338,34463338,7,4,7,99,1187721666102244", "", "1187721666102244" + System.lineSeparator()),
+        Arguments.of("104,1125899906842624,99", "104,1125899906842624,99", "", "1125899906842624" + System.lineSeparator()),
+        Arguments.of("109,1,21102,34463338,34463338,9,204,9,99,-1", "109,1,21102,34463338,34463338,9,204,9,99,-1,1187721666102244", "", "1187721666102244" + System.lineSeparator())
+      );
+    }
+  }
+}
