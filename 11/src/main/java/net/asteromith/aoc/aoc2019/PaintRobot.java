@@ -62,7 +62,9 @@ public class PaintRobot {
       this.direction = Direction.UP;
       this.position = Cell.of(0, 0);
       this.path = new HashMap<>();
-      this.path.put(position, new Panel());
+      Panel startPanel = new Panel();
+      startPanel.paint(Paint.WHITE);
+      this.path.put(position, startPanel);
     }
 
     void run(Instruction instruction) {
