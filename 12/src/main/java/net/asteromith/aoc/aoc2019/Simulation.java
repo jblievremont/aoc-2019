@@ -1,6 +1,6 @@
 package net.asteromith.aoc.aoc2019;
 
-import java.util.stream.Collectors;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class Simulation {
@@ -38,6 +38,19 @@ public class Simulation {
       i ++;
     }
     return new Simulation(step + 1, moved);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Simulation that = (Simulation) o;
+    return Arrays.equals(moonStates, that.moonStates);
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(moonStates);
   }
 
   int totalEnergy() {
